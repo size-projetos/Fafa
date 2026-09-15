@@ -148,6 +148,7 @@ curtas e sem markdown pesado.
 
         resposta = Resposta(texto="")
         ferramentas = self.registro.schemas()
+        textos: list[str] = []  # texto de todas as rodadas, nao so da ultima
 
         for rodada in range(1, MAX_RODADAS_FERRAMENTA + 1):
             resposta.rodadas = rodada
@@ -168,9 +169,13 @@ curtas e sem markdown pesado.
             mensagens.append(msg_assistente.para_api())
             self.memoria.adicionar_mensagem(sessao_id, msg_assistente)
 
+            parcial = _texto_dos_blocos(blocos)
+            if parcial:
+                textos.append(parcial)
+
             chamadas = [b for b in blocos if b.get("type") == "tool_use"]
             if saida.stop_reason != "tool_use" or not chamadas:
-                resposta.texto = _texto_dos_blocos(blocos)
+                resposta.texto = "\n\n".join(textos)
                 return resposta
 
             resultados = []

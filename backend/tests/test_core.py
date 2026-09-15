@@ -100,7 +100,7 @@ def test_loop_do_agente_com_ferramenta(cfg, memoria):
         usuario="t",
         ao_progresso=progresso.append,
     )
-    assert r.texto == "Azimute 90°, 100 m."
+    assert r.texto == "vou calcular\n\nAzimute 90°, 100 m."
     assert r.ferramentas_usadas == ["azimute_distancia"]
     assert r.rodadas == 2
     assert r.tokens_entrada == 30 and r.tokens_saida == 13
