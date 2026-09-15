@@ -24,7 +24,14 @@ python -m venv .venv
 pip install -e ".[all,dev]"
 copy .env.example .env      # preencher ANTHROPIC_API_KEY
 fafa                        # conversa no terminal
+fafa voz                    # conversa por voz (ver backend/docs/voz.md)
 pytest                      # testes
+```
+
+Para abrir o Fafa como aplicativo, pelo ícone na área de trabalho:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File backend\scripts\criar_atalho.ps1
 ```
 
 ## Estrutura
@@ -35,7 +42,9 @@ pytest                      # testes
 - `src/app.js`: navegação e interações principais.
 - `src/operations.js`: projetos, tarefas, riscos, decisões e persistência local.
 - `backend/src/fafa/`: agente, registro de ferramentas, memória, ferramentas geo e canais.
-- `backend/docs/`: arquitetura, roadmap e configuração do WhatsApp do backend.
+- `backend/docs/`: arquitetura, roadmap, WhatsApp e voz do backend.
+- `Fafa.bat`: lançador do desktop (ativa o venv e abre `fafa voz`).
+- `src/fafa.ico`: ícone do atalho.
 - `docs/ARCHITECTURE.md`: arquitetura e limites atuais.
 - `docs/ROADMAP.md`: próximas integrações.
 - `AGENTS.md`: orientação para agentes de IA que alterarem o projeto.

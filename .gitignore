@@ -12,6 +12,7 @@ coverage/
 # Ambiente e segredos
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 

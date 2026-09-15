@@ -17,6 +17,15 @@ sequência; documentos e organização de arquivos ficam em segundo plano.
 - [ ] Integrar com os scripts existentes do `C:\geo312` (nuvem de pontos, LiDAR)
 - [ ] Memorial descritivo em texto (parágrafo por segmento) a partir da tabela
 
+## Fase 1b — Voz e atalho no desktop · *entregue em 15/09/2026*
+
+- [x] `fafa voz`: Enter → fala → transcrição (OpenAI) → resposta falada (ElevenLabs / OpenAI / Windows)
+- [x] Detector de fim de fala por silêncio; texto digitado como alternativa
+- [x] `Fafa.bat` + `criar_atalho.ps1` + ícone: Fafa abre como aplicativo pelo ícone na área de trabalho
+- [ ] Palavra de ativação ("Fafa, …") e tecla de atalho global
+- [ ] Interromper a fala ao começar a falar
+- [ ] Voz do Fafa escolhida (ElevenLabs) e chaves configuradas no SIZE-LIDAR
+
 ## Fase 2 — WhatsApp · *próxima*
 
 - [x] Envio de texto e template (Meta Cloud API)

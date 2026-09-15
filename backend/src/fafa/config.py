@@ -53,7 +53,43 @@ class Config(BaseSettings):
     fafa_web_port: int = 8000
     fafa_web_token: str = ""
 
+    # --- Voz --------------------------------------------------------------
+    # TTS: auto | elevenlabs | openai | windows | mudo
+    fafa_tts: str = "auto"
+    # STT: auto | openai | texto
+    fafa_stt: str = "auto"
+    fafa_voz_limiar: float = 0.012      # RMS (0-1) acima do qual ha fala
+    fafa_voz_silencio_s: float = 1.2    # segundos de silencio que encerram a fala
+    fafa_voz_max_s: float = 60.0        # duracao maxima de uma gravacao
+    fafa_voz_espera_s: float = 8.0      # tempo esperando a fala comecar
+
+    elevenlabs_api_key: str = ""
+    elevenlabs_voice_id: str = ""
+    elevenlabs_model: str = "eleven_flash_v2_5"
+
+    openai_api_key: str = ""
+    openai_tts_model: str = "gpt-4o-mini-tts"
+    openai_tts_voice: str = "marin"
+    openai_stt_model: str = "gpt-4o-mini-transcribe"
+
     # --- Derivados ----------------------------------------------------------
+    @property
+    def tts_efetivo(self) -> str:
+        """Resolve 'auto' para o melhor motor de voz disponivel."""
+        if self.fafa_tts != "auto":
+            return self.fafa_tts
+        if self.elevenlabs_api_key and self.elevenlabs_voice_id:
+            return "elevenlabs"
+        if self.openai_api_key:
+            return "openai"
+        return "windows"
+
+    @property
+    def stt_efetivo(self) -> str:
+        if self.fafa_stt != "auto":
+            return self.fafa_stt
+        return "openai" if self.openai_api_key else "texto"
+
     @property
     def caminho_banco(self) -> Path:
         """Caminho absoluto do banco SQLite, com o diretorio ja criado."""

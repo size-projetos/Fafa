@@ -23,6 +23,16 @@ log = logging.getLogger("fafa.agente")
 
 MAX_RODADAS_FERRAMENTA = 12
 
+_NOTAS_CANAL = {
+    "voz": (
+        "Canal atual: VOZ. O usuario esta falando com voce e vai OUVIR a resposta. "
+        "Responda como em uma conversa: 1 a 3 frases, sem listas, tabelas, markdown ou "
+        "simbolos. Coordenadas e numeros longos: diga so o essencial e ofereca mostrar a "
+        "tabela completa na tela. Se precisar de varias etapas, avise em uma frase e faca."
+    ),
+    "whatsapp": "Canal atual: WhatsApp. Respostas curtas, sem markdown.",
+}
+
 
 @dataclass(slots=True)
 class Contexto:
@@ -80,7 +90,7 @@ class Agente:
 
     # --- Prompt de sistema ----------------------------------------------------
 
-    def prompt_sistema(self) -> str:
+    def prompt_sistema(self, canal: str = "cli") -> str:
         c = self.config
         memorias = self.memoria.memorias()
         bloco_memorias = (
@@ -109,7 +119,8 @@ cliente, decisao, preferencia), use a ferramenta `lembrar`. Nao guarde dados
 sensiveis ou passageiros.
 
 Responda de forma objetiva. Em canais de mensagem (WhatsApp) prefira respostas
-curtas e sem markdown pesado."""
+curtas e sem markdown pesado.
+{_NOTAS_CANAL.get(canal, "")}"""
 
     # --- Conversa -------------------------------------------------------------
 
@@ -143,7 +154,7 @@ curtas e sem markdown pesado."""
             saida = self.cliente.messages.create(
                 model=self.config.fafa_model,
                 max_tokens=self.config.fafa_max_tokens,
-                system=self.prompt_sistema(),
+                system=self.prompt_sistema(canal),
                 messages=mensagens,
                 tools=ferramentas or None,
             )

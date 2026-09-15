@@ -18,6 +18,12 @@ def main(argv: list[str] | None = None) -> int:
     p_chat = sub.add_parser("chat", help="conversa no terminal (padrao)")
     p_chat.add_argument("--usuario", default="local")
 
+    p_voz = sub.add_parser("voz", help="conversa por voz no desktop (Enter para falar)")
+    p_voz.add_argument("--usuario", default="local")
+    p_voz.add_argument("--mudo", action="store_true", help="nao fala as respostas")
+
+    sub.add_parser("audio", help="lista os dispositivos de audio (diagnostico)")
+
     sub.add_parser("tools", help="lista as ferramentas registradas")
 
     p_wa = sub.add_parser("whatsapp", help="sobe o servidor de webhook do WhatsApp")
@@ -43,6 +49,20 @@ def main(argv: list[str] | None = None) -> int:
         from fafa.channels.cli import CanalCli
 
         CanalCli(Agente(), usuario=args.usuario).loop()
+        return 0
+
+    if comando == "voz":
+        from fafa.channels.voz import CanalVoz
+
+        CanalVoz(Agente(), usuario=args.usuario, mudo=args.mudo).loop()
+        return 0
+
+    if comando == "audio":
+        from fafa.config import config
+        from fafa.voz.audio import dispositivos
+
+        print(f"TTS: {config.tts_efetivo}   STT: {config.stt_efetivo}\n")
+        print(dispositivos())
         return 0
 
     if comando == "tools":

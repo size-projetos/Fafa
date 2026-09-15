@@ -41,12 +41,17 @@ instale `pyproj`, que já vem no extra `[all]`.
 
 ```powershell
 fafa                     # conversa no terminal
+fafa voz                 # conversa por voz: Enter, fala, ele responde falando (ver docs/voz.md)
+fafa audio               # lista microfones/saídas e os motores de voz em uso
 fafa tools               # lista as ferramentas e seus parâmetros
 fafa whatsapp            # sobe o webhook do WhatsApp (ver docs/whatsapp.md)
 fafa notificar 5551982835944 "Terminei a tabela do Parque Germânico."
 ```
 
-No terminal: `/tools`, `/memorias`, `/limpar`, `/sair`.
+No terminal: `/tools`, `/memorias`, `/limpar`, `/sair`; no modo voz também `/mudo`.
+
+**Atalho na área de trabalho:** `powershell -ExecutionPolicy Bypass -File backend\scripts\criar_atalho.ps1`
+cria o ícone **Fafa**, que abre o modo voz numa janela própria (`Fafa.bat` na raiz).
 
 Exemplo de conversa:
 
@@ -70,13 +75,18 @@ src/fafa/
     geo.py           ferramentas de topografia
     _projecao.py     transformação de coordenadas (pyproj ou motor interno)
     memoria.py       lembrar / esquecer
+  voz/
+    audio.py         microfone (detector de fala por RMS) e reprodução PCM
+    tts.py           falar: ElevenLabs, OpenAI, Windows
+    stt.py           ouvir: OpenAI transcribe
   channels/
     base.py          contrato Canal (processar, enviar, notificar)
     cli.py           terminal
+    voz.py           conversa por voz no desktop
     whatsapp.py      Meta Cloud API: envio, template e webhook
   __main__.py        comando `fafa`
-tests/               27 testes; a projeção interna é validada contra o pyproj
-docs/                arquitetura, roadmap, configuração do WhatsApp
+tests/               39 testes; a projeção interna é validada contra o pyproj
+docs/                arquitetura, roadmap, WhatsApp, voz
 ```
 
 ## Desenvolvimento
