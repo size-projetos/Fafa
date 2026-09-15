@@ -1,0 +1,21 @@
+# Sistema e editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Dependências e builds futuros
+node_modules/
+dist/
+coverage/
+
+# Ambiente e segredos
+.env
+.env.*
+*.pem
+*.key
+
+# Temporários
+*.log
+*.tmp
+work/
