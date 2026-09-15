@@ -111,10 +111,19 @@ def ver_camera(indice: int = 0) -> Imagem:
     """Tira uma foto agora com a webcam do computador e devolve a imagem."""
     import cv2
 
-    cap = cv2.VideoCapture(indice, cv2.CAP_DSHOW)
-    if not cap.isOpened():
-        cap.release()
-        raise RuntimeError(f"camera {indice} nao encontrada ou em uso por outro programa")
+    # Windows: Media Foundation e o padrao moderno; DirectShow e o legado; ANY deixa o OpenCV escolher.
+    backends = [getattr(cv2, n) for n in ("CAP_MSMF", "CAP_DSHOW", "CAP_ANY") if hasattr(cv2, n)]
+    cap = None
+    for backend in backends:
+        tentativa = cv2.VideoCapture(indice, backend)
+        if tentativa.isOpened():
+            cap = tentativa
+            break
+        tentativa.release()
+    if cap is None:
+        raise RuntimeError(
+            f"camera {indice} nao encontrada ou em uso por outro programa (Meet, Teams, OBS...)"
+        )
     try:
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
