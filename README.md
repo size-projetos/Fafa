@@ -1,6 +1,9 @@
 # Fafa | SIZE Engenharia
 
-Central operacional de IA da SIZE Engenharia. A aplicação organiza agentes especializados, recomenda o agente adequado para cada solicitação e mantém projetos, tarefas, riscos, decisões e registros de arquivos no navegador.
+Central operacional de IA da SIZE Engenharia, em duas camadas:
+
+- **Painel web** (`src/`): organiza agentes especializados, recomenda o agente adequado para cada solicitação e mantém projetos, tarefas, riscos, decisões e registros de arquivos no navegador.
+- **Backend** (`backend/`): o núcleo de inteligência do Fafa — um agente em Python sobre a API da Anthropic, com ferramentas de topografia e geoprocessamento, memória persistente e canais de conversa (terminal e WhatsApp). Documentação própria em [`backend/README.md`](backend/README.md).
 
 ## Executar localmente
 
@@ -12,6 +15,18 @@ python -m http.server 4173 --directory src
 
 Abra `http://127.0.0.1:4173`.
 
+## Executar o backend
+
+```powershell
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -e ".[all,dev]"
+copy .env.example .env      # preencher ANTHROPIC_API_KEY
+fafa                        # conversa no terminal
+pytest                      # testes
+```
+
 ## Estrutura
 
 - `src/index.html`: interface principal.
@@ -19,13 +34,15 @@ Abra `http://127.0.0.1:4173`.
 - `src/agents.js`: catálogo e roteamento dos agentes.
 - `src/app.js`: navegação e interações principais.
 - `src/operations.js`: projetos, tarefas, riscos, decisões e persistência local.
+- `backend/src/fafa/`: agente, registro de ferramentas, memória, ferramentas geo e canais.
+- `backend/docs/`: arquitetura, roadmap e configuração do WhatsApp do backend.
 - `docs/ARCHITECTURE.md`: arquitetura e limites atuais.
 - `docs/ROADMAP.md`: próximas integrações.
 - `AGENTS.md`: orientação para agentes de IA que alterarem o projeto.
 
 ## Estado atual
 
-A versão 1 funciona como aplicação estática e armazena os dados no `localStorage` do navegador. A integração com drives está deliberadamente pausada até a organização das fontes de arquivos.
+O painel (versão 1) funciona como aplicação estática e armazena os dados no `localStorage` do navegador. O backend (fase 1) roda no terminal do desktop SIZE-LIDAR com as ferramentas de geoprocessamento; o canal WhatsApp está implementado e aguarda a configuração da conta Meta. Painel e backend ainda não se comunicam — essa integração está no roadmap. A integração com drives está deliberadamente pausada até a organização das fontes de arquivos.
 
 ## Privacidade e propriedade
 

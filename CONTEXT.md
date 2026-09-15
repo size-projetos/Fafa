@@ -57,7 +57,11 @@ O catálogo completo, com nomes, descrições, links, palavras-chave e regras de
 
 ## 5. Arquitetura atual
 
-A versão 1 é uma aplicação web estática, sem compilação e sem dependências obrigatórias.
+O repositório tem duas camadas independentes.
+
+### 5.1 Painel web (versão 1)
+
+Aplicação web estática, sem compilação e sem dependências obrigatórias.
 
 - `src/index.html`: estrutura da interface.
 - `src/style.css`: identidade visual e responsividade.
@@ -67,6 +71,20 @@ A versão 1 é uma aplicação web estática, sem compilação e sem dependênci
 - `AGENTS.md`: regras para outras IAs que trabalharem no projeto.
 - `docs/ARCHITECTURE.md`: arquitetura e limitações.
 - `docs/ROADMAP.md`: próximas fases.
+
+### 5.2 Backend (fase 1 — adicionado em 15/09/2026)
+
+Núcleo de inteligência do Fafa em Python (`backend/`), construído com Claude a partir das decisões de Daniel Broleis:
+
+- Um único agente sobre a API da Anthropic serve todos os canais. Loop modelo → ferramenta → resultado, com limite de rodadas e persistência de cada passo.
+- Ferramentas registradas por decorator (`@ferramenta`); o schema da API é gerado da assinatura Python.
+- Memória em SQLite: histórico por sessão (`canal:usuário`) e fatos duráveis que entram no prompt de sistema.
+- Ferramentas de geoprocessamento: conversão de coordenadas (SIRGAS 2000 / UTM 22S por padrão, EPSG:31982), azimute e distância, tabela completa de vértices (E/N, lat/lon, azimute GMS, confrontantes, perímetro, área), leitura de CSV. Sem `pyproj`, um motor interno (série de Krüger) cobre SIRGAS 2000 e WGS 84 com erro < 1 mm, validado por testes contra o pyproj.
+- Canais: terminal (`fafa chat`) e WhatsApp via Meta Cloud API (envio, template, webhook, lista de números autorizados). Telegram e painel web ficam como possibilidades, não implementadas.
+- Prioridade definida por Daniel: geoprocessamento primeiro, WhatsApp na sequência; geração de documentos SIZE e organização de arquivos/e-mail em segundo plano.
+- Detalhes em `backend/README.md`, `backend/docs/arquitetura.md`, `backend/docs/roadmap.md` e `backend/docs/whatsapp.md`.
+
+Painel e backend ainda não se comunicam. A integração prevista é um endpoint HTTP no backend consumido pelo painel.
 
 ## 6. Decisões confirmadas
 
@@ -78,6 +96,9 @@ A versão 1 é uma aplicação web estática, sem compilação e sem dependênci
 6. A integração com drives deve permanecer aberta no planejamento, porém desativada até a organização dos drives da empresa.
 7. O código deve permanecer privado enquanto a empresa avalia sua evolução.
 8. Outras IAs podem trabalhar no projeto desde que sigam o `AGENTS.md` e não inventem integrações ou acessos.
+9. O backend é em Python, usa a API da Anthropic diretamente (sem framework de agentes) e adota SIRGAS 2000 / UTM 22S como sistema de coordenadas padrão.
+10. O backend roda primeiro no desktop SIZE-LIDAR (terminal); o WhatsApp é o canal para avisos e comandos quando Daniel está fora do computador.
+11. Este repositório (`size-projetos/Fafa`) é o principal e o único que outras IAs devem usar. O `size-projetos/size-fafa` foi criado por engano e está vazio.
 
 ## 7. Limitações conhecidas
 
@@ -87,8 +108,15 @@ A versão 1 é uma aplicação web estática, sem compilação e sem dependênci
 - O registro de arquivos guarda metadados, não o conteúdo.
 - A pesquisa em Google Drive e outras nuvens está desativada.
 - Indicadores de CPU, RAM, rede e atividade exibidos por um navegador não devem ser tratados como telemetria real sem uma integração própria.
+- O backend ainda não foi testado com uma chave real da API da Anthropic; os testes usam um cliente simulado.
+- O canal WhatsApp depende de conta Meta Business, número dedicado e URL pública para o webhook; fora da janela de 24 h só mensagens de template aprovado podem ser enviadas.
+- O backend não lê DXF nem gera `.docx`; isso está no roadmap.
 
 ## 8. Próxima fase recomendada
+
+Para o backend (ordem de Daniel): primeira conversa real com a chave da API; leitura de DXF; exportação `.xlsx`; conta Meta e túnel para o WhatsApp. Detalhes em `backend/docs/roadmap.md`.
+
+Para o painel e a integração das camadas:
 
 1. Organizar os drives e definir fontes autorizadas.
 2. Definir usuários, papéis e permissões.
@@ -102,10 +130,10 @@ A versão 1 é uma aplicação web estática, sem compilação e sem dependênci
 ## 9. Links de referência
 
 - Produto publicado: https://fafa-size-engenharia.projetos334718.chatgpt.site
-- Repositório privado principal: https://github.com/size-projetos/Fafa
+- Repositório principal: https://github.com/size-projetos/Fafa (tornado público por Daniel em 15/09/2026)
 - Site institucional: https://www.sizeengenhariaambiental.com.br/
 
 ## 10. Instrução para a próxima IA
 
-Antes de alterar o produto, leia `AGENTS.md`, este documento, `docs/ARCHITECTURE.md` e `docs/ROADMAP.md`. Preserve as decisões confirmadas, não conecte os drives sem autorização expressa e mantenha segredos fora do código-fonte.
+Antes de alterar o produto, leia `AGENTS.md`, este documento, `docs/ARCHITECTURE.md` e `docs/ROADMAP.md`. Para mexer no backend, leia também `backend/README.md` e `backend/docs/arquitetura.md` e rode `pytest` antes e depois. Preserve as decisões confirmadas, não conecte os drives sem autorização expressa e mantenha segredos fora do código-fonte.
 

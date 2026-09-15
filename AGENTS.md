@@ -6,7 +6,7 @@ Evoluir o Fafa como central operacional da SIZE Engenharia, preservando a identi
 
 ## Regras de trabalho
 
-1. Leia `README.md`, `docs/ARCHITECTURE.md` e `docs/ROADMAP.md` antes de alterar o código.
+1. Leia `README.md`, `CONTEXT.md`, `docs/ARCHITECTURE.md` e `docs/ROADMAP.md` antes de alterar o código. Para o backend, leia também `backend/README.md` e `backend/docs/arquitetura.md`.
 2. Preserve a paleta SIZE: verde geomático, verde profissional, turquesa, grafite e cinzas técnicos.
 3. Mantenha a tipografia Montserrat e o nome **Fafa**.
 4. Trate o catálogo em `src/agents.js` como fonte única dos agentes.
@@ -17,6 +17,15 @@ Evoluir o Fafa como central operacional da SIZE Engenharia, preservando a identi
 9. Teste busca, filtros, roteamento, persistência e exportação após mudanças funcionais.
 10. Documente mudanças de arquitetura e limites conhecidos.
 
+## Regras específicas do backend (`backend/`)
+
+11. Toda ferramenta nova é uma função Python tipada, com docstring, decorada com `@ferramenta` — o schema é gerado dela; não escreva schemas à mão.
+12. Padrão de coordenadas: SIRGAS 2000 / UTM 22S (EPSG:31982), geográfico EPSG:4674. Só mude quando o usuário pedir.
+13. Rode `pytest` e `ruff check src tests` antes de considerar uma mudança pronta. A projeção interna deve continuar batendo com o pyproj (< 1 mm).
+14. Segredos ficam apenas no `backend/.env` local. `.env.example` lista as variáveis, sempre vazias.
+15. Não adicione canais (Telegram, web) nem integrações (Drive, e-mail) sem pedido expresso de Daniel; a interface `Canal` já existe para quando for a hora.
+16. Português do Brasil no código, nas docstrings e nas mensagens ao usuário.
+
 ## Critérios de conclusão
 
 - Interface sem erros no console.
@@ -24,3 +33,4 @@ Evoluir o Fafa como central operacional da SIZE Engenharia, preservando a identi
 - Dados locais preservados após recarregar a página.
 - Nenhuma credencial ou dado privado versionado.
 - Documentação atualizada quando o comportamento mudar.
+- Backend: testes passando e `fafa tools` listando as ferramentas sem erro.
