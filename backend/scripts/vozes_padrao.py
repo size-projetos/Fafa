@@ -34,6 +34,11 @@ def _h():
     return {"xi-api-key": config.elevenlabs_api_key}
 
 
+def _curto(nome: str) -> str:
+    """'Roger - Laid-Back, Casual' -> 'roger'."""
+    return nome.split(" - ")[0].strip().lower()
+
+
 def vozes() -> list[dict]:
     r = httpx.get(f"{API}/voices", headers=_h(), timeout=60)
     r.raise_for_status()
@@ -43,12 +48,12 @@ def vozes() -> list[dict]:
 def listar() -> None:
     for v in vozes():
         lab = v.get("labels") or {}
-        print(f"{v['name']:<9} {lab.get('gender',''):<7} {lab.get('age',''):<12} "
+        print(f"{_curto(v['name']):<8} {v['name'][:40]:<40} {lab.get('gender',''):<7} {lab.get('age',''):<12} "
               f"{lab.get('accent',''):<14} {lab.get('description',''):<16} {lab.get('use_case','')}")
 
 
 def tocar(nomes: list[str]) -> None:
-    por_nome = {v["name"].lower(): v for v in vozes()}
+    por_nome = {_curto(v["name"]): v for v in vozes()}
     for nome in nomes:
         v = por_nome.get(nome.lower())
         if not v:
@@ -73,7 +78,7 @@ def tocar(nomes: list[str]) -> None:
 
 
 def usar(nome: str) -> None:
-    por_nome = {v["name"].lower(): v for v in vozes()}
+    por_nome = {_curto(v["name"]): v for v in vozes()}
     v = por_nome.get(nome.lower())
     if not v:
         sys.exit(f"voz '{nome}' nao encontrada")
