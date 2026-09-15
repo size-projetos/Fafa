@@ -82,6 +82,7 @@ Núcleo de inteligência do Fafa em Python (`backend/`), construído com Claude 
 - Ferramentas de geoprocessamento: conversão de coordenadas (SIRGAS 2000 / UTM 22S por padrão, EPSG:31982), azimute e distância, tabela completa de vértices (E/N, lat/lon, azimute GMS, confrontantes, perímetro, área), leitura de CSV. Sem `pyproj`, um motor interno (série de Krüger) cobre SIRGAS 2000 e WGS 84 com erro < 1 mm, validado por testes contra o pyproj.
 - Canais: terminal (`fafa chat`), voz no desktop (`fafa voz`: Enter, fala, resposta falada) e WhatsApp via Meta Cloud API (envio, template, webhook, lista de números autorizados). Telegram e painel web ficam como possibilidades, não implementadas.
 - Voz: transcrição pela OpenAI (`gpt-4o-mini-transcribe`); fala por ElevenLabs (preferido, pago), OpenAI (`gpt-4o-mini-tts`) ou SAPI do Windows (grátis), escolhidos pelas chaves no `.env`. Detalhes em `backend/docs/voz.md`.
+- Visão: `ver_tela` (captura de tela), `ver_arquivo` (imagem, PDF renderizado, texto) e `ver_camera` (webcam). A imagem vai ao modelo só no turno da captura; o histórico guarda um marcador textual. Detalhes em `backend/docs/visao.md`.
 - Aplicativo: `Fafa.bat` na raiz e `backend/scripts/criar_atalho.ps1` criam o ícone **Fafa** na área de trabalho, que abre o modo voz. Ícone em `src/fafa.ico` (original, paleta SIZE) — o `src/fafa-logo.png` do repositório está corrompido (só as primeiras linhas decodificam) e precisa ser reenviado.
 - Prioridade definida por Daniel: geoprocessamento primeiro, WhatsApp na sequência; geração de documentos SIZE e organização de arquivos/e-mail em segundo plano.
 - Detalhes em `backend/README.md`, `backend/docs/arquitetura.md`, `backend/docs/roadmap.md` e `backend/docs/whatsapp.md`.
@@ -110,7 +111,7 @@ Painel e backend ainda não se comunicam. A integração prevista é um endpoint
 - O registro de arquivos guarda metadados, não o conteúdo.
 - A pesquisa em Google Drive e outras nuvens está desativada.
 - Indicadores de CPU, RAM, rede e atividade exibidos por um navegador não devem ser tratados como telemetria real sem uma integração própria.
-- O backend ainda não foi testado com uma chave real da API da Anthropic; os testes usam um cliente simulado.
+- Primeira conversa real com a API da Anthropic feita em 15/09/2026 (chave `fafa-size-lidar`, gravada só em `backend/.env` do SIZE-LIDAR). Os testes automatizados continuam usando um cliente simulado.
 - O canal WhatsApp depende de conta Meta Business, número dedicado e URL pública para o webhook; fora da janela de 24 h só mensagens de template aprovado podem ser enviadas.
 - O backend não lê DXF nem gera `.docx`; isso está no roadmap.
 - A voz é push-to-talk (Enter); não há palavra de ativação nem interrupção da fala.

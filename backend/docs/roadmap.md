@@ -26,6 +26,13 @@ sequência; documentos e organização de arquivos ficam em segundo plano.
 - [ ] Interromper a fala ao começar a falar
 - [ ] Voz do Fafa escolhida (ElevenLabs) e chaves configuradas no SIZE-LIDAR
 
+## Fase 1c — Visão · *entregue em 15/09/2026*
+
+- [x] `ver_tela`, `ver_arquivo` (imagem, PDF, texto), `ver_camera`
+- [x] Imagem enviada só no turno da captura; histórico guarda marcador
+- [ ] Ler DXF como desenho (renderizar polilinhas) além de extrair vértices
+- [ ] Receber foto pelo WhatsApp e responder (entra com a fase 2)
+
 ## Fase 2 — WhatsApp · *próxima*
 
 - [x] Envio de texto e template (Meta Cloud API)

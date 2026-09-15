@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from fafa.config import Config, config as config_padrao
+from fafa.core.imagem import Imagem, ResultadoVisual
 from fafa.core.memory import Memoria, Mensagem
 from fafa.core.registry import Registro, registro as registro_padrao
 
@@ -114,6 +115,12 @@ Padroes tecnicos da empresa (adote sempre que o usuario nao disser o contrario):
 Memorias duraveis (fatos que voce guardou em conversas anteriores):
 {bloco_memorias}
 
+Voce enxerga: `ver_tela` captura a tela do computador, `ver_arquivo` abre
+imagens, PDFs e textos, `ver_camera` tira uma foto pela webcam. Quando o
+usuario disser "olha isso", "ve aqui", "o que e isso na tela", use `ver_tela`
+sem pedir confirmacao. Descreva o que ve com precisao tecnica e admita quando
+algo estiver ilegivel.
+
 Quando o usuario disser algo que vale lembrar para sempre (nome de projeto,
 cliente, decisao, preferencia), use a ferramenta `lembrar`. Nao guarde dados
 sensiveis ou passageiros.
@@ -178,25 +185,22 @@ curtas e sem markdown pesado.
                 resposta.texto = "\n\n".join(textos)
                 return resposta
 
-            resultados = []
+            resultados_api = []
+            resultados_memoria = []
             for chamada in chamadas:
                 nome = chamada["name"]
                 resposta.ferramentas_usadas.append(nome)
                 if ao_progresso:
                     ao_progresso(f"executando {nome}...")
-                conteudo, erro = self._executar(nome, chamada.get("input") or {}, ctx)
-                bloco_resultado: dict[str, Any] = {
-                    "type": "tool_result",
-                    "tool_use_id": chamada["id"],
-                    "content": conteudo,
-                }
+                para_api, para_memoria, erro = self._executar(nome, chamada.get("input") or {}, ctx)
+                base = {"type": "tool_result", "tool_use_id": chamada["id"]}
                 if erro:
-                    bloco_resultado["is_error"] = True
-                resultados.append(bloco_resultado)
+                    base["is_error"] = True
+                resultados_api.append({**base, "content": para_api})
+                resultados_memoria.append({**base, "content": para_memoria})
 
-            msg_resultados = Mensagem("user", resultados)
-            mensagens.append(msg_resultados.para_api())
-            self.memoria.adicionar_mensagem(sessao_id, msg_resultados)
+            mensagens.append({"role": "user", "content": resultados_api})
+            self.memoria.adicionar_mensagem(sessao_id, Mensagem("user", resultados_memoria))
 
         resposta.texto = (
             "Atingi o limite de etapas para esta tarefa sem concluir. "
@@ -206,20 +210,40 @@ curtas e sem markdown pesado.
 
     # --- Execucao de ferramentas ----------------------------------------------
 
-    def _executar(self, nome: str, entrada: dict[str, Any], ctx: Contexto) -> tuple[str, bool]:
-        """Executa uma ferramenta e devolve (conteudo_texto, houve_erro)."""
+    def _executar(
+        self, nome: str, entrada: dict[str, Any], ctx: Contexto
+    ) -> tuple[Any, Any, bool]:
+        """Executa uma ferramenta.
+
+        Devolve (conteudo_para_api, conteudo_para_memoria, houve_erro). Os dois sao
+        iguais para texto; para imagens, a API recebe os blocos `image` e a memoria
+        recebe so um marcador textual.
+        """
         f = self.registro.obter(nome)
         if f is None:
-            return f"Ferramenta desconhecida: {nome}", True
+            msg = f"Ferramenta desconhecida: {nome}"
+            return msg, msg, True
         try:
             kwargs = dict(entrada)
             if "_ctx" in inspect.signature(f.funcao).parameters:
                 kwargs["_ctx"] = ctx
             resultado = f.executar(**kwargs)
-            return _serializar(resultado), False
         except Exception as exc:  # noqa: BLE001 - o modelo precisa ver o erro
             log.warning("erro na ferramenta %s: %s\n%s", nome, exc, traceback.format_exc())
-            return f"Erro ao executar {nome}: {type(exc).__name__}: {exc}", True
+            msg = f"Erro ao executar {nome}: {type(exc).__name__}: {exc}"
+            return msg, msg, True
+
+        if isinstance(resultado, Imagem):
+            resultado = ResultadoVisual([resultado])
+        if isinstance(resultado, ResultadoVisual):
+            blocos: list[dict[str, Any]] = [im.bloco_api() for im in resultado.imagens]
+            marcadores = " ".join(im.marcador() for im in resultado.imagens)
+            texto = (resultado.texto + " " if resultado.texto else "") + marcadores
+            blocos.append({"type": "text", "text": texto.strip()})
+            return blocos, texto.strip(), False
+
+        texto = _serializar(resultado)
+        return texto, texto, False
 
 
 # --- Utilitarios --------------------------------------------------------------

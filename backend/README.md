@@ -16,6 +16,7 @@ Veja o [roadmap](docs/roadmap.md).
 | `azimute_distancia` | Azimute (GMS e decimal) e distância entre dois pontos |
 | `tabela_vertices` | Tabela completa do polígono: E/N, lat/lon, azimutes, distâncias, confrontantes, perímetro, área, sentido |
 | `ler_csv_coordenadas` | Lê CSV de vértices (`;` ou `,`, números no formato brasileiro) |
+| `ver_tela` / `ver_arquivo` / `ver_camera` | Olhos: captura de tela, imagens/PDF/texto e webcam (ver [docs/visao.md](docs/visao.md)) |
 | `lembrar` / `esquecer` / `listar_memorias` | Memória de longo prazo entre conversas |
 
 Padrão de trabalho: **SIRGAS 2000 / UTM 22S (EPSG:31982)**, geográfico EPSG:4674,
@@ -69,10 +70,12 @@ src/fafa/
   config.py          configurações (.env)
   core/
     agent.py         loop modelo ↔ ferramentas ↔ memória
+    imagem.py        Imagem/ResultadoVisual: blocos image para a API
     registry.py      @ferramenta: schema JSON gerado da assinatura Python
     memory.py        SQLite: histórico por sessão + fatos duráveis
   tools/
     geo.py           ferramentas de topografia
+    visao.py         ver_tela, ver_arquivo, ver_camera
     _projecao.py     transformação de coordenadas (pyproj ou motor interno)
     memoria.py       lembrar / esquecer
   voz/
@@ -85,8 +88,8 @@ src/fafa/
     voz.py           conversa por voz no desktop
     whatsapp.py      Meta Cloud API: envio, template e webhook
   __main__.py        comando `fafa`
-tests/               39 testes; a projeção interna é validada contra o pyproj
-docs/                arquitetura, roadmap, WhatsApp, voz
+tests/               45 testes; a projeção interna é validada contra o pyproj
+docs/                arquitetura, roadmap, WhatsApp, voz, visão
 ```
 
 ## Desenvolvimento
