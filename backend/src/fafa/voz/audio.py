@@ -11,6 +11,7 @@ from __future__ import annotations
 import io
 import math
 import struct
+import sys
 import time
 import wave
 from dataclasses import dataclass
@@ -27,13 +28,7 @@ class Gravacao:
     teve_fala: bool
 
     def como_wav(self) -> bytes:
-        buf = io.BytesIO()
-        with wave.open(buf, "wb") as w:
-            w.setnchannels(1)
-            w.setsampwidth(2)
-            w.setframerate(self.taxa)
-            w.writeframes(self.pcm)
-        return buf.getvalue()
+        return _pcm_para_wav(self.pcm, self.taxa)
 
 
 def rms(bloco: bytes) -> float:
@@ -124,14 +119,38 @@ def gravar(
     ) if detector.teve_fala else Gravacao(b"", TAXA_MIC, time.monotonic() - inicio, False)
 
 
+def _pcm_para_wav(pcm: bytes, taxa: int) -> bytes:
+    buf = io.BytesIO()
+    with wave.open(buf, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(taxa)
+        w.writeframes(pcm)
+    return buf.getvalue()
+
+
 def reproduzir_pcm(pcm: bytes, taxa: int = TAXA_REPRODUCAO) -> None:
-    """Toca PCM int16 mono e espera terminar."""
+    """Toca PCM int16 mono e espera terminar.
+
+    No Windows usa o caminho nativo (winsound, o mesmo da voz do sistema), que
+    respeita o dispositivo padrao inclusive com fones Bluetooth. Nos demais
+    sistemas, ou se o winsound falhar, usa sounddevice.
+    """
+    if not pcm:
+        return
+    pcm = pcm[: len(pcm) - len(pcm) % 2]
+    if sys.platform == "win32":
+        try:
+            import winsound
+
+            winsound.PlaySound(_pcm_para_wav(pcm, taxa), winsound.SND_MEMORY)
+            return
+        except Exception:  # noqa: BLE001 - cai para o sounddevice
+            pass
     import numpy as np
     import sounddevice as sd
 
-    if not pcm:
-        return
-    dados = np.frombuffer(pcm[: len(pcm) - len(pcm) % 2], dtype=np.int16)
+    dados = np.frombuffer(pcm, dtype=np.int16)
     sd.play(dados, samplerate=taxa)
     sd.wait()
 
