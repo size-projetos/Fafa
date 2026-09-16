@@ -25,6 +25,7 @@ Evoluir o Fafa como central operacional da SIZE Engenharia, preservando a identi
 14. Segredos ficam apenas no `backend/.env` local. `.env.example` lista as variáveis, sempre vazias.
 15. Não adicione canais (Telegram, web) nem integrações (Drive, e-mail) sem pedido expresso de Daniel; a interface `Canal` já existe para quando for a hora.
 16. Português do Brasil no código, nas docstrings e nas mensagens ao usuário.
+17. `backend/especialistas/` espelha as skills do Daniel; não edite o conteúdo delas aqui (edite a skill de origem e copie de novo). O Fafa indica GPTs a partir de `src/agents.js`; nunca duplique o catálogo em outro lugar.
 
 ## Critérios de conclusão
 

@@ -26,3 +26,4 @@
 .eyebrow.nucleo-on{color:var(--mint)}
 .eyebrow.nucleo-on::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#00ab78;margin-right:7px;box-shadow:0 0 0 3px rgba(0,171,120,.18)}
 #voice-chat.gravando{border-color:#00ab78;color:#fff;background:rgba(0,171,120,.18)}
+.message .link-nucleo{color:var(--mint);text-decoration:underline;text-underline-offset:3px;word-break:break-all}

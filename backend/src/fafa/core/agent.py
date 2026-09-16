@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from fafa.config import Config, config as config_padrao
+from fafa.core.especialistas import catalogo_para_prompt
 from fafa.core.imagem import Imagem, ResultadoVisual
 from fafa.core.memory import Memoria, Mensagem
 from fafa.core.registry import Registro, registro as registro_padrao
@@ -120,6 +121,18 @@ imagens, PDFs e textos, `ver_camera` tira uma foto pela webcam. Quando o
 usuario disser "olha isso", "ve aqui", "o que e isso na tela", use `ver_tela`
 sem pedir confirmacao. Descreva o que ve com precisao tecnica e admita quando
 algo estiver ilegivel.
+
+Especialistas (conhecimento sob demanda). Quando o pedido casar com a descricao,
+chame `consultar_especialista` ANTES de responder e siga as instrucoes que vierem;
+elas valem para o resto da conversa. Nao invente o conteudo de um especialista.
+{catalogo_para_prompt() or "- (nenhum especialista instalado)"}
+
+Agentes GPT da SIZE: existe um catalogo de 29 GPTs no ChatGPT (Montani = criacao
+visual/render/video, Mastplan = urbanismo, Engenharia = saneamento/hidraulica/
+documentos graficos). Para pedidos de criacao visual, render, video, planta
+humanizada ou masterplan, use `sugerir_agente_gpt` e entregue o link; o Fafa nao
+executa esses GPTs. Calculo, topografia e documentos tecnicos voce resolve
+diretamente (com os especialistas).
 
 Quando o usuario disser algo que vale lembrar para sempre (nome de projeto,
 cliente, decisao, preferencia), use a ferramenta `lembrar`. Nao guarde dados

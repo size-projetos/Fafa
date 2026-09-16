@@ -17,6 +17,8 @@ Veja o [roadmap](docs/roadmap.md).
 | `tabela_vertices` | Tabela completa do polígono: E/N, lat/lon, azimutes, distâncias, confrontantes, perímetro, área, sentido |
 | `ler_csv_coordenadas` | Lê CSV de vértices (`;` ou `,`, números no formato brasileiro) |
 | `ver_tela` / `ver_arquivo` / `ver_camera` | Olhos: captura de tela, imagens/PDF/texto e webcam (ver [docs/visao.md](docs/visao.md)) |
+| `consultar_especialista` / `ler_referencia_especialista` | Skills do Daniel dentro do Fafa: auxiliar-escritorio, due360, site-topografia, budo-seedance ×16 (ver [docs/especialistas.md](docs/especialistas.md)) |
+| `sugerir_agente_gpt` / `listar_agentes_gpt` | Indica o GPT certo do catálogo da SIZE (29) com link |
 | `lembrar` / `esquecer` / `listar_memorias` | Memória de longo prazo entre conversas |
 
 Padrão de trabalho: **SIRGAS 2000 / UTM 22S (EPSG:31982)**, geográfico EPSG:4674,
@@ -76,6 +78,9 @@ src/fafa/
   tools/
     geo.py           ferramentas de topografia
     visao.py         ver_tela, ver_arquivo, ver_camera
+    especialistas.py consultar_especialista, sugerir_agente_gpt
+  core/especialistas.py  carrega backend/especialistas/*/SKILL.md sob demanda
+especialistas/       as skills (SKILL.md + references) que o Fafa consulta
     _projecao.py     transformação de coordenadas (pyproj ou motor interno)
     memoria.py       lembrar / esquecer
   voz/
@@ -88,8 +93,8 @@ src/fafa/
     voz.py           conversa por voz no desktop
     whatsapp.py      Meta Cloud API: envio, template e webhook
   __main__.py        comando `fafa`
-tests/               45 testes; a projeção interna é validada contra o pyproj
-docs/                arquitetura, roadmap, WhatsApp, voz, visão
+tests/               61 testes; a projeção interna é validada contra o pyproj
+docs/                arquitetura, roadmap, WhatsApp, voz, visão, especialistas
 ```
 
 ## Desenvolvimento

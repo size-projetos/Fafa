@@ -63,7 +63,9 @@ sequência; documentos e organização de arquivos ficam em segundo plano.
 - [x] `Fafa.bat` abre o painel como aplicativo
 - [ ] Painel mostra tabelas de vértices e imagens (ver_tela) formatadas, não só texto
 - [ ] Projetos/tarefas do painel deixam o `localStorage` e passam para o SQLite do backend
-- [ ] Encaminhar ao GPT certo a partir da conversa (o Fafa sugere o agente do catálogo)
+- [x] Encaminhar ao GPT certo a partir da conversa (`sugerir_agente_gpt`, links clicáveis no painel)
+- [x] Especialistas (skills) sob demanda: auxiliar-escritorio, due360, site-topografia, budo ×16
+- [ ] Botão "Abrir no ChatGPT" na resposta do painel quando houver sugestão de GPT
 
 ## Ideias sem fase
 

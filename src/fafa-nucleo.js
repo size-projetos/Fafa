@@ -11,9 +11,18 @@ const estado=texto=>{const el=$('voice-status');if(el)el.textContent=texto||'';}
 const historico=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'[]');}catch{return [];}};
 const guardar=msgs=>{try{localStorage.setItem(KEY,JSON.stringify(msgs.slice(-40)));}catch{}};
 
+function preencher(el,texto){
+  // texto puro + URLs como links (nunca innerHTML com texto do modelo)
+  el.replaceChildren();
+  const partes=String(texto).split(/(https?:\/\/[^\s<>()"']+)/g);
+  partes.forEach((parte,i)=>{
+    if(i%2===1){const a=document.createElement('a');a.href=parte;a.target='_blank';a.rel='noopener noreferrer';a.textContent=parte.replace(/^https?:\/\//,'').slice(0,60)+(parte.length>68?'…':'');a.className='link-nucleo';el.append(a);}
+    else if(parte)el.append(document.createTextNode(parte));
+  });
+}
 function bolha(role,texto,extra){
   const box=$('chat-messages');const d=document.createElement('div');
-  d.className='message nucleo '+role+(extra?' '+extra:'');d.textContent=texto;box.append(d);
+  d.className='message nucleo '+role+(extra?' '+extra:'');preencher(d,texto);box.append(d);
   box.scrollTop=box.scrollHeight;return d;
 }
 function renderHistorico(){
@@ -63,7 +72,7 @@ async function perguntar(texto){
     const r=await fetch(base+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texto,usuario:'painel'})});
     if(!r.ok)throw Error('HTTP '+r.status);
     const j=await r.json();
-    pend.classList.remove('pending');pend.textContent=j.texto||'(sem resposta)';
+    pend.classList.remove('pending');preencher(pend,j.texto||'(sem resposta)');
     if(j.ferramentas?.length){const s=document.createElement('small');s.className='ferramentas';s.textContent='ferramentas: '+j.ferramentas.join(', ');pend.append(s);}
     msgs.push({role:'assistant',text:j.texto||''});guardar(msgs);
     falar(j.texto||'');
