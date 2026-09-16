@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+import unicodedata
 from abc import ABC, abstractmethod
 
 import httpx
@@ -36,6 +38,29 @@ class Ouvido(ABC):
         return self.transcrever(g)
 
 
+VOCABULARIO = (
+    "Conversa técnica de topografia e engenharia: coordenadas UTM, SIRGAS 2000, "
+    "vértices, azimute, memorial descritivo, loteamento, CORSAN, SIZE Engenharia."
+)
+
+
+def _normalizar(t: str) -> str:
+    t = unicodedata.normalize("NFKD", t.lower())
+    t = "".join(c for c in t if not unicodedata.combining(c))
+    return re.sub(r"[^a-z0-9 ]+", " ", t).strip()
+
+
+def eco_do_vocabulario(transcricao: str) -> bool:
+    """True se o modelo devolveu o proprio prompt de vocabulario (alucinacao em silencio/ruido)."""
+    a, b = _normalizar(transcricao), _normalizar(VOCABULARIO)
+    if not a:
+        return True
+    if a in b or b in a:
+        return True
+    pa, pb = set(a.split()), set(b.split())
+    return len(pa & pb) / max(1, len(pa)) > 0.7
+
+
 class OuvidoOpenAI(Ouvido):
     nome = "openai"
 
@@ -53,15 +78,13 @@ class OuvidoOpenAI(Ouvido):
                 "model": self.cfg.openai_stt_model,
                 "language": "pt",
                 "response_format": "json",
-                "prompt": (
-                    "Conversa técnica de topografia e engenharia: coordenadas UTM, SIRGAS 2000, "
-                    "vértices, azimute, memorial descritivo, loteamento, CORSAN, SIZE Engenharia."
-                ),
+                "prompt": VOCABULARIO,
             },
             timeout=60,
         )
         r.raise_for_status()
-        return (r.json().get("text") or "").strip()
+        texto = (r.json().get("text") or "").strip()
+        return "" if eco_do_vocabulario(texto) else texto
 
 
 def criar_ouvido(cfg: Config | None = None) -> Ouvido | None:

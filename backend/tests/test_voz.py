@@ -143,6 +143,7 @@ def test_openai_tts_e_stt(monkeypatch, tmp_path):
 
     g = audio.Gravacao(pcm=_pcm(500), taxa=16000, duracao_s=1.0, teve_fala=True)
     assert stt.OuvidoOpenAI(cfg).transcrever(g) == "azimute de noventa graus"
+    assert chamadas[1][1]["data"]["prompt"] == stt.VOCABULARIO
     dados = chamadas[1][1]["data"]
     assert dados["model"] == "gpt-4o-mini-transcribe" and dados["language"] == "pt"
     assert chamadas[1][1]["files"]["file"][0] == "fala.wav"
@@ -194,3 +195,11 @@ def test_criar_voz_elevenlabs_vem_com_reserva(tmp_path):
     v = tts.criar_voz(cfg)
     assert isinstance(v, tts.VozComReserva)
     assert isinstance(v.principal, tts.VozElevenLabs)
+
+
+def test_eco_do_vocabulario():
+    assert stt.eco_do_vocabulario(stt.VOCABULARIO)
+    assert stt.eco_do_vocabulario("Conversa técnica de topografia e engenharia: coordenadas UTM")
+    assert stt.eco_do_vocabulario("")
+    assert not stt.eco_do_vocabulario("Fafa, qual o azimute de M1 para M2?")
+    assert not stt.eco_do_vocabulario("monta a tabela do loteamento Parque Germânico")
