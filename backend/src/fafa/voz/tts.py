@@ -133,20 +133,60 @@ class VozWindows(Voz):
         return b""
 
 
+class VozComReserva(Voz):
+    """Tenta o motor principal; se ele falhar (plano, rede, chave), usa a reserva.
+
+    Depois da primeira falha o Fafa avisa uma vez e passa a usar a reserva direto
+    ate o proximo reinicio, para nao esperar a API a cada frase.
+    """
+
+    def __init__(self, principal: Voz, reserva: Voz) -> None:
+        self.principal = principal
+        self.reserva = reserva
+        self.nome = f"{principal.nome} (reserva: {reserva.nome})"
+        self._usando_reserva = False
+
+    def sintetizar(self, texto: str) -> bytes:
+        if not self._usando_reserva:
+            try:
+                return self.principal.sintetizar(texto)
+            except Exception as exc:  # noqa: BLE001
+                detalhe = ""
+                resp = getattr(exc, "response", None)
+                if resp is not None:
+                    try:
+                        detalhe = resp.json().get("detail", {}).get("message", "")
+                    except Exception:  # noqa: BLE001
+                        detalhe = resp.text[:120]
+                log.warning("voz %s falhou (%s %s); usando %s",
+                            self.principal.nome, type(exc).__name__, detalhe, self.reserva.nome)
+                print(f"  (voz {self.principal.nome} indisponível: {detalhe or exc}; "
+                      f"usando {self.reserva.nome})")
+                self._usando_reserva = True
+        return self.reserva.sintetizar(texto)
+
+
+def _voz_windows_ou_muda(cfg: Config) -> Voz:
+    try:
+        return VozWindows(cfg)
+    except Exception as exc:  # noqa: BLE001
+        log.warning("voz do Windows indisponivel (%s); ficando mudo", exc)
+        return VozMuda()
+
+
 def criar_voz(cfg: Config | None = None) -> Voz:
-    """Instancia o motor escolhido em FAFA_TTS (ou o melhor disponivel em 'auto')."""
+    """Instancia o motor escolhido em FAFA_TTS (ou o melhor disponivel em 'auto').
+
+    Motores em nuvem vem com a voz do Windows de reserva.
+    """
     cfg = cfg or config_padrao
     motor = cfg.tts_efetivo
     if motor == "mudo":
         return VozMuda()
     if motor == "elevenlabs":
-        return VozElevenLabs(cfg)
+        return VozComReserva(VozElevenLabs(cfg), _voz_windows_ou_muda(cfg))
     if motor == "openai":
-        return VozOpenAI(cfg)
+        return VozComReserva(VozOpenAI(cfg), _voz_windows_ou_muda(cfg))
     if motor == "windows":
-        try:
-            return VozWindows(cfg)
-        except Exception as exc:  # noqa: BLE001
-            log.warning("voz do Windows indisponivel (%s); ficando mudo", exc)
-            return VozMuda()
+        return _voz_windows_ou_muda(cfg)
     raise ValueError(f"FAFA_TTS invalido: {motor}")

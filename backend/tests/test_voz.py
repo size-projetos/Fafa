@@ -164,3 +164,33 @@ def test_prompt_do_canal_voz(tmp_path):
     a = Agente(config=cfg, memoria=Memoria(cfg.caminho_banco), cliente=object())
     assert "Canal atual: VOZ" in a.prompt_sistema("voz")
     assert "Canal atual" not in a.prompt_sistema("cli")
+
+
+def test_voz_com_reserva_cai_para_reserva_uma_vez():
+    class Falha(tts.Voz):
+        nome = "nuvem"
+        chamadas = 0
+
+        def sintetizar(self, texto):
+            Falha.chamadas += 1
+            raise RuntimeError("402 plano")
+
+    class Reserva(tts.Voz):
+        nome = "local"
+
+        def sintetizar(self, texto):
+            return b"ok"
+
+    v = tts.VozComReserva(Falha(), Reserva())
+    assert v.sintetizar("a") == b"ok"
+    assert v.sintetizar("b") == b"ok"
+    assert Falha.chamadas == 1          # depois da 1a falha nao insiste na nuvem
+    assert "reserva" in v.nome
+
+
+def test_criar_voz_elevenlabs_vem_com_reserva(tmp_path):
+    cfg = Config(anthropic_api_key="x", fafa_db_path=str(tmp_path / "t.db"),
+                 elevenlabs_api_key="e", elevenlabs_voice_id="v")
+    v = tts.criar_voz(cfg)
+    assert isinstance(v, tts.VozComReserva)
+    assert isinstance(v.principal, tts.VozElevenLabs)
