@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from fafa.config import Config, config as config_padrao
-from fafa.core.especialistas import catalogo_para_prompt
+from fafa.core.especialistas import Especialista, catalogo_para_prompt, rotear
 from fafa.core.imagem import Imagem, ResultadoVisual
 from fafa.core.memory import Memoria, Mensagem
 from fafa.core.registry import Registro, registro as registro_padrao
@@ -92,7 +92,7 @@ class Agente:
 
     # --- Prompt de sistema ----------------------------------------------------
 
-    def prompt_sistema(self, canal: str = "cli") -> str:
+    def prompt_sistema(self, canal: str = "cli", especialistas: list[Especialista] | None = None) -> str:
         c = self.config
         memorias = self.memoria.memorias()
         bloco_memorias = (
@@ -144,7 +144,7 @@ sensiveis ou passageiros.
 
 Responda de forma objetiva. Em canais de mensagem (WhatsApp) prefira respostas
 curtas e sem markdown pesado.
-{_NOTAS_CANAL.get(canal, "")}"""
+{_NOTAS_CANAL.get(canal, "")}{_bloco_especialistas(especialistas)}"""
 
     # --- Conversa -------------------------------------------------------------
 
@@ -165,7 +165,11 @@ curtas e sem markdown pesado.
         self.memoria.garantir_sessao(sessao_id, canal, usuario)
         ctx = Contexto(self.config, self.memoria, sessao_id, canal, usuario)
 
-        mensagens = [m.para_api() for m in self.memoria.historico(sessao_id)]
+        historico = self.memoria.historico(sessao_id)
+        mensagens = [m.para_api() for m in historico]
+        # Especialistas ativados por gatilho em qualquer mensagem do usuario nesta sessao
+        textos_usuario = [m.conteudo for m in historico if m.papel == "user" and isinstance(m.conteudo, str)]
+        ativos = rotear(textos_usuario + [texto])
         nova = Mensagem("user", texto)
         mensagens.append(nova.para_api())
         self.memoria.adicionar_mensagem(sessao_id, nova)
@@ -179,7 +183,7 @@ curtas e sem markdown pesado.
             saida = self.cliente.messages.create(
                 model=self.config.fafa_model,
                 max_tokens=self.config.fafa_max_tokens,
-                system=self.prompt_sistema(canal),
+                system=self.prompt_sistema(canal, ativos),
                 messages=mensagens,
                 tools=ferramentas or None,
             )
@@ -264,6 +268,17 @@ curtas e sem markdown pesado.
 
 
 # --- Utilitarios --------------------------------------------------------------
+
+
+def _bloco_especialistas(especialistas: list[Especialista] | None) -> str:
+    if not especialistas:
+        return ""
+    partes = ["\n\n=== ESPECIALISTAS ATIVOS NESTA CONVERSA (siga estas instrucoes) ==="]
+    for e in especialistas:
+        partes.append(f"\n--- {e.nome} ---\n{e.corpo}")
+        if e.referencias:
+            partes.append("Referencias disponiveis (ler_referencia_especialista): " + ", ".join(e.referencias[:20]))
+    return "\n".join(partes)
 
 
 def _bloco_para_dict(bloco: Any) -> dict[str, Any]:

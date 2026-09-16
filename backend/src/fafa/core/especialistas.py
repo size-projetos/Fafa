@@ -117,6 +117,49 @@ def obter(nome: str) -> Especialista | None:
     return carregar_todos().get(nome.strip().lower())
 
 
+# Gatilhos deterministas: se a conversa contem um destes termos, as instrucoes do
+# especialista entram no prompt de sistema sem depender do modelo "lembrar" de
+# chamar a ferramenta. Complementa (nao substitui) consultar_especialista.
+GATILHOS: dict[str, tuple[str, ...]] = {
+    "auxiliar-escritorio": (
+        "topograf", "vertice", "vértice", "marco", "azimute", "memorial", "coordenada",
+        "utm", "sirgas", "georref", "gnss", "rtk", "estacao total", "estação total", "lidar",
+        "drone", "dxf", "cad", "loteamento", "terraplen", "drenagem", "pavimenta", "saneamento",
+        "corsan", "esgoto", "agua", "água", "rodovia", "dnit", "daer", "sigef", "incra",
+        "matricula", "matrícula", "laudo", "planilha", "orcamento", "orçamento", "fiscaliza",
+        "abnt", "nbr", "norma", "lei magna", "regra da size", "padrao da size", "padrão da size",
+        "confrontante", "perimetro", "perímetro", "area do lote", "área do lote", "planta",
+        "projeto executivo", "art ", "crea", "cft",
+    ),
+    "due360": ("due360", "due 360", "motor de decisao", "motor de decisão", "regra de ouro",
+               "regra diamante", "kernel", "constituicao", "constituição", "adr", "decision log",
+               "governanca", "governança"),
+    "site-topografia": ("landing page", "site da", "pagina de vendas", "página de vendas", "site para"),
+    "budo-seedance-base": ("seedance", "higgsfield", "prompt de video", "prompt de vídeo",
+                           "video promocional", "vídeo promocional", "reels", "tiktok", "shorts",
+                           "budo"),
+}
+
+
+def _norm(t: str) -> str:
+    import unicodedata
+
+    t = unicodedata.normalize("NFKD", t.lower())
+    return "".join(c for c in t if not unicodedata.combining(c))
+
+
+def rotear(textos: list[str]) -> list[Especialista]:
+    """Especialistas cujos gatilhos aparecem em algum dos textos (mensagens do usuario)."""
+    todos = carregar_todos()
+    corpo = _norm(" \n ".join(textos))
+    ativos = []
+    for nome, gatilhos in GATILHOS.items():
+        e = todos.get(nome)
+        if e and any(_norm(g) in corpo for g in gatilhos):
+            ativos.append(e)
+    return ativos
+
+
 def catalogo_para_prompt() -> str:
     """Lista compacta para o prompt de sistema: os budo agrupados numa linha so."""
     todos = carregar_todos()

@@ -64,3 +64,36 @@ def test_prompt_lista_especialistas_e_gpts(cfg, memoria):
     p = a.prompt_sistema()
     assert "consultar_especialista" in p and "auxiliar-escritorio" in p
     assert "sugerir_agente_gpt" in p and "29 GPTs" in p
+
+
+def test_rotear_por_gatilho():
+    nomes = lambda ts: [e.nome for e in esp.rotear(ts)]  # noqa: E731
+    assert nomes(["qual é a Lei Magna dos vértices?"]) == ["auxiliar-escritorio"]
+    assert nomes(["me ajuda com a governança DUE360 desse projeto"]) == ["auxiliar-escritorio", "due360"] or \
+           "due360" in nomes(["me ajuda com a governança DUE360 desse projeto"])
+    assert nomes(["quero um prompt de vídeo para o Higgsfield"]) == ["budo-seedance-base"]
+    assert nomes(["oi, tudo bem?"]) == []
+    assert nomes(["oi", "monta a tabela de coordenadas do loteamento"]) == ["auxiliar-escritorio"]  # gatilho em mensagem anterior
+
+
+def test_agente_injeta_especialista_no_prompt(cfg, memoria):
+    from types import SimpleNamespace
+
+    vistos = []
+
+    class Cliente:
+        def __init__(self):
+            self.messages = SimpleNamespace(create=self.create)
+
+        def create(self, **kw):
+            vistos.append(kw["system"])
+            return SimpleNamespace(stop_reason="end_turn", usage=None,
+                                   content=[SimpleNamespace(type="text", text="ok")])
+
+    a = Agente(config=cfg, memoria=memoria, cliente=Cliente())
+    a.responder("oi", sessao_id="s", canal="cli", usuario="u")
+    assert "ESPECIALISTAS ATIVOS" not in vistos[-1]
+    a.responder("qual a Lei Magna dos vértices?", sessao_id="s", canal="cli", usuario="u")
+    assert "ESPECIALISTAS ATIVOS" in vistos[-1] and "Lei Magna dos vértices" in vistos[-1]
+    a.responder("e o perímetro?", sessao_id="s", canal="cli", usuario="u")   # continua ativo pelo historico
+    assert "--- auxiliar-escritorio ---" in vistos[-1]

@@ -23,6 +23,13 @@ instruções não entram em toda mensagem; entram só quando são úteis.
 Ferramentas: `consultar_especialista(nome)`, `ler_referencia_especialista(nome, caminho)`,
 `listar_especialistas()`.
 
+**Gatilhos deterministas.** Modelos às vezes "esquecem" de chamar a ferramenta e
+respondem de memória (aconteceu no primeiro teste: inventou a Lei Magna dos
+vértices). Por isso `fafa.core.especialistas.GATILHOS` mapeia termos → especialista;
+se um termo aparece em qualquer mensagem do usuário na sessão, as instruções
+entram direto no prompt de sistema (`=== ESPECIALISTAS ATIVOS ===`). Custo: o
+`auxiliar-escritorio` soma ≈ 2.500 tokens ao prompt enquanto o assunto for técnico.
+
 ## Catálogo de GPTs (src/agents.js)
 
 Os 29 agentes GPT do painel (Montani / Mastplan / Engenharia) **não rodam dentro
