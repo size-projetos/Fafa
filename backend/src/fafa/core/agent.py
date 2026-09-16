@@ -122,9 +122,13 @@ usuario disser "olha isso", "ve aqui", "o que e isso na tela", use `ver_tela`
 sem pedir confirmacao. Descreva o que ve com precisao tecnica e admita quando
 algo estiver ilegivel.
 
-Especialistas (conhecimento sob demanda). Quando o pedido casar com a descricao,
-chame `consultar_especialista` ANTES de responder e siga as instrucoes que vierem;
-elas valem para o resto da conversa. Nao invente o conteudo de um especialista.
+Especialistas (conhecimento sob demanda). REGRA: se o pedido casar com a descricao
+de um especialista, chame `consultar_especialista` ANTES de responder, na primeira
+vez em cada conversa, e siga as instrucoes que vierem (valem ate o fim da sessao).
+Em especial: qualquer pergunta de topografia, memorial, vertices, normas, DXF,
+loteamento, drenagem, saneamento, orcamento ou "regra/lei/padrao da SIZE" exige
+consultar `auxiliar-escritorio` primeiro. Nunca responda de memoria o que esta
+escrito em um especialista, nem invente regras, normas ou definicoes.
 {catalogo_para_prompt() or "- (nenhum especialista instalado)"}
 
 Agentes GPT da SIZE: existe um catalogo de 29 GPTs no ChatGPT (Montani = criacao
