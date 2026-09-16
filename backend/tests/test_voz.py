@@ -203,3 +203,12 @@ def test_eco_do_vocabulario():
     assert stt.eco_do_vocabulario("")
     assert not stt.eco_do_vocabulario("Fafa, qual o azimute de M1 para M2?")
     assert not stt.eco_do_vocabulario("monta a tabela do loteamento Parque Germânico")
+
+
+def test_cadeia_elevenlabs_openai_windows(tmp_path):
+    cfg = Config(anthropic_api_key="x", fafa_db_path=str(tmp_path / "t.db"),
+                 elevenlabs_api_key="e", elevenlabs_voice_id="v", openai_api_key="o")
+    v = tts.criar_voz(cfg)
+    assert isinstance(v.principal, tts.VozElevenLabs)
+    assert isinstance(v.reserva, tts.VozComReserva)
+    assert isinstance(v.reserva.principal, tts.VozOpenAI)

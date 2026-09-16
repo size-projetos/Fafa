@@ -184,7 +184,13 @@ def criar_voz(cfg: Config | None = None) -> Voz:
     if motor == "mudo":
         return VozMuda()
     if motor == "elevenlabs":
-        return VozComReserva(VozElevenLabs(cfg), _voz_windows_ou_muda(cfg))
+        # Cadeia: ElevenLabs -> OpenAI (se houver chave) -> Windows
+        reserva = (
+            VozComReserva(VozOpenAI(cfg), _voz_windows_ou_muda(cfg))
+            if cfg.openai_api_key
+            else _voz_windows_ou_muda(cfg)
+        )
+        return VozComReserva(VozElevenLabs(cfg), reserva)
     if motor == "openai":
         return VozComReserva(VozOpenAI(cfg), _voz_windows_ou_muda(cfg))
     if motor == "windows":
