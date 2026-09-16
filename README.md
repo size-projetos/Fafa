@@ -41,9 +41,11 @@ powershell -ExecutionPolicy Bypass -File backend\scripts\criar_atalho.ps1
 - `src/agents.js`: catálogo e roteamento dos agentes.
 - `src/app.js`: navegação e interações principais.
 - `src/operations.js`: projetos, tarefas, riscos, decisões e persistência local.
+- `src/fafa-nucleo.js`: liga a Conversa com Fafa ao backend quando ele está no ar (chat, voz, microfone).
 - `backend/src/fafa/`: agente, registro de ferramentas, memória, ferramentas geo e canais.
 - `backend/docs/`: arquitetura, roadmap, WhatsApp e voz do backend.
-- `Fafa.bat`: lançador do desktop (ativa o venv e abre `fafa voz`).
+- `Fafa.bat`: lançador do desktop — sobe o núcleo e abre o painel como aplicativo (`fafa web`).
+- `Fafa-Voz.bat`: alternativa no terminal, por voz (`fafa voz`).
 - `src/fafa.ico`: ícone do atalho.
 - `docs/ARCHITECTURE.md`: arquitetura e limites atuais.
 - `docs/ROADMAP.md`: próximas integrações.
@@ -51,7 +53,7 @@ powershell -ExecutionPolicy Bypass -File backend\scripts\criar_atalho.ps1
 
 ## Estado atual
 
-O painel (versão 1) funciona como aplicação estática e armazena os dados no `localStorage` do navegador. O backend (fase 1) roda no terminal do desktop SIZE-LIDAR com as ferramentas de geoprocessamento; o canal WhatsApp está implementado e aguarda a configuração da conta Meta. Painel e backend ainda não se comunicam — essa integração está no roadmap. A integração com drives está deliberadamente pausada até a organização das fontes de arquivos.
+O painel (versão 1) continua funcionando sozinho como aplicação estática, com dados no `localStorage`. Quando o backend está rodando (`fafa web`, ou o ícone **Fafa** no desktop), ele serve o painel em `http://127.0.0.1:8000` e a seção **Conversa com Fafa** passa a falar com o núcleo Python — cálculo, visão, memória, voz e microfone — via `src/fafa-nucleo.js`; sem o backend, a conversa volta ao comportamento local. Projetos, tarefas e riscos seguem no `localStorage` (próxima etapa: migrar para o SQLite do backend). O canal WhatsApp está implementado e aguarda a configuração da conta Meta. A integração com drives está deliberadamente pausada até a organização das fontes de arquivos.
 
 ## Privacidade e propriedade
 

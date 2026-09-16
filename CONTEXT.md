@@ -87,7 +87,7 @@ Núcleo de inteligência do Fafa em Python (`backend/`), construído com Claude 
 - Prioridade definida por Daniel: geoprocessamento primeiro, WhatsApp na sequência; geração de documentos SIZE e organização de arquivos/e-mail em segundo plano.
 - Detalhes em `backend/README.md`, `backend/docs/arquitetura.md`, `backend/docs/roadmap.md` e `backend/docs/whatsapp.md`.
 
-Painel e backend ainda não se comunicam. A integração prevista é um endpoint HTTP no backend consumido pelo painel.
+Integração painel ↔ backend (16/09/2026): `fafa web` serve o painel e expõe `/api/saude`, `/api/chat`, `/api/falar` (áudio WAV) e `/api/ouvir` (transcrição). `src/fafa-nucleo.js` detecta o núcleo e assume a **Conversa com Fafa** (texto, voz do Fafa e microfone via MediaRecorder), mantendo o comportamento local quando o backend não está rodando. `Fafa.bat` abre o painel em janela de aplicativo (Edge/Chrome `--app`). Projetos/tarefas continuam no `localStorage`; a migração para o SQLite é a próxima etapa.
 
 ## 6. Decisões confirmadas
 

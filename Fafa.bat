@@ -1,5 +1,5 @@
 @echo off
-rem Fafa - lancador do desktop. Abre o Fafa por voz na janela propria.
+rem Fafa - abre o painel ligado ao nucleo (janela de aplicativo).
 title Fafa
 chcp 65001 >nul
 set PYTHONUTF8=1
@@ -14,5 +14,5 @@ if not exist ".env" (
   pause
   exit /b 1
 )
-".venv\Scripts\python.exe" -m fafa voz %*
+".venv\Scripts\python.exe" -m fafa web %*
 if errorlevel 1 pause

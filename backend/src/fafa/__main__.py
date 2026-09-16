@@ -18,6 +18,10 @@ def main(argv: list[str] | None = None) -> int:
     p_chat = sub.add_parser("chat", help="conversa no terminal (padrao)")
     p_chat.add_argument("--usuario", default="local")
 
+    p_web = sub.add_parser("web", help="abre o painel do Fafa ligado ao nucleo (aplicativo)")
+    p_web.add_argument("--porta", type=int, default=None)
+    p_web.add_argument("--sem-janela", action="store_true", help="so sobe o servidor")
+
     p_voz = sub.add_parser("voz", help="conversa por voz no desktop (Enter para falar)")
     p_voz.add_argument("--usuario", default="local")
     p_voz.add_argument("--mudo", action="store_true", help="nao fala as respostas")
@@ -49,6 +53,23 @@ def main(argv: list[str] | None = None) -> int:
         from fafa.channels.cli import CanalCli
 
         CanalCli(Agente(), usuario=args.usuario).loop()
+        return 0
+
+    if comando == "web":
+        import threading
+
+        import uvicorn
+
+        from fafa.channels.web import abrir_como_app, criar_app
+        from fafa.config import config
+
+        porta = args.porta or config.fafa_web_port
+        url = f"http://{config.fafa_web_host}:{porta}/"
+        app = criar_app(Agente())
+        if not args.sem_janela:
+            threading.Timer(1.2, abrir_como_app, args=(url,)).start()
+        print(f"{config.fafa_nome} · painel em {url}  (Ctrl+C para encerrar)")
+        uvicorn.run(app, host=config.fafa_web_host, port=porta, log_level="warning")
         return 0
 
     if comando == "voz":
@@ -85,7 +106,7 @@ def main(argv: list[str] | None = None) -> int:
         uvicorn.run(
             criar_app(Agente()),
             host=args.host or config.fafa_web_host,
-            port=args.porta or config.fafa_web_port,
+            port=args.porta or config.fafa_whatsapp_port,
         )
         return 0
 

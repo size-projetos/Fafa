@@ -70,10 +70,14 @@ class OuvidoOpenAI(Ouvido):
         super().__init__(cfg)
 
     def transcrever(self, gravacao: Gravacao) -> str:
+        return self.transcrever_arquivo(gravacao.como_wav(), "fala.wav", "audio/wav")
+
+    def transcrever_arquivo(self, dados: bytes, nome: str, mime: str) -> str:
+        """Transcreve um arquivo de audio ja codificado (wav, webm, ogg, mp3...)."""
         r = httpx.post(
             "https://api.openai.com/v1/audio/transcriptions",
             headers={"Authorization": f"Bearer {self.cfg.openai_api_key}"},
-            files={"file": ("fala.wav", gravacao.como_wav(), "audio/wav")},
+            files={"file": (nome, dados, mime)},
             data={
                 "model": self.cfg.openai_stt_model,
                 "language": "pt",

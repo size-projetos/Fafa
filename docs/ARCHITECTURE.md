@@ -1,8 +1,10 @@
 # Arquitetura
 
 O repositório tem duas camadas: o **painel web** (`src/`, versão 1) e o
-**backend** (`backend/`, fase 1). Este documento descreve o painel; o backend
-está em `backend/docs/arquitetura.md`. As camadas ainda não se comunicam.
+**backend** (`backend/`). Este documento descreve o painel; o backend está em
+`backend/docs/arquitetura.md`. Com o backend no ar (`fafa web`), o painel é
+servido por ele e `src/fafa-nucleo.js` liga a Conversa com Fafa ao núcleo pela
+API local (`/api/*`); sem backend, o painel segue autônomo.
 
 ## Painel web (versão 1)
 

@@ -58,9 +58,12 @@ sequência; documentos e organização de arquivos ficam em segundo plano.
 
 ## Integração com o painel web (v1)
 
-- [ ] Endpoint HTTP `/chat` no backend para o painel conversar com o Fafa
-- [ ] Painel mostra tabelas de vértices e resultados geo gerados pelo backend
+- [x] `fafa web`: serve o painel + `/api/chat`, `/api/falar`, `/api/ouvir`, `/api/saude` (16/09)
+- [x] `fafa-nucleo.js`: Conversa com Fafa ligada ao núcleo, com voz e microfone; reserva local
+- [x] `Fafa.bat` abre o painel como aplicativo
+- [ ] Painel mostra tabelas de vértices e imagens (ver_tela) formatadas, não só texto
 - [ ] Projetos/tarefas do painel deixam o `localStorage` e passam para o SQLite do backend
+- [ ] Encaminhar ao GPT certo a partir da conversa (o Fafa sugere o agente do catálogo)
 
 ## Ideias sem fase
 

@@ -50,7 +50,8 @@ class Config(BaseSettings):
     whatsapp_allowed_numbers: str = ""
 
     fafa_web_host: str = "127.0.0.1"
-    fafa_web_port: int = 8000
+    fafa_web_port: int = 8000          # painel web + API local
+    fafa_whatsapp_port: int = 8001     # webhook do WhatsApp
     fafa_web_token: str = ""
 
     # --- Voz --------------------------------------------------------------
