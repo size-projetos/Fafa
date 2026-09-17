@@ -30,9 +30,10 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("tools", help="lista as ferramentas registradas")
 
-    p_wa = sub.add_parser("whatsapp", help="sobe o servidor de webhook do WhatsApp")
+    p_wa = sub.add_parser("whatsapp", help="sobe o webhook do WhatsApp (e o tunel publico)")
     p_wa.add_argument("--host", default=None)
     p_wa.add_argument("--porta", type=int, default=None)
+    p_wa.add_argument("--sem-tunel", action="store_true", help="nao abre o cloudflared")
 
     p_not = sub.add_parser("notificar", help="envia um aviso por WhatsApp")
     p_not.add_argument("numero", help="numero com DDI, ex.: 5551982835944")
@@ -110,14 +111,37 @@ def main(argv: list[str] | None = None) -> int:
     if comando == "whatsapp":
         import uvicorn
 
-        from fafa.channels.whatsapp import criar_app
+        from fafa.channels.whatsapp import abrir_tunel, criar_app
         from fafa.config import config
 
-        uvicorn.run(
-            criar_app(Agente()),
-            host=args.host or config.fafa_web_host,
-            port=args.porta or config.fafa_whatsapp_port,
-        )
+        porta = args.porta or config.fafa_whatsapp_port
+        faltando = [n for n, v in (("WHATSAPP_TOKEN", config.whatsapp_token),
+                                   ("WHATSAPP_PHONE_NUMBER_ID", config.whatsapp_phone_number_id),
+                                   ("WHATSAPP_VERIFY_TOKEN", config.whatsapp_verify_token),
+                                   ("WHATSAPP_ALLOWED_NUMBERS", config.whatsapp_allowed_numbers)) if not v]
+        if faltando:
+            print("Aviso: faltam no .env: " + ", ".join(faltando) + " (o webhook sobe, mas nao responde).")
+
+        tunel = None
+        if not args.sem_tunel:
+            def mostrar(url: str) -> None:
+                print("\n" + "=" * 64)
+                print(f"  URL publica do webhook:  {url}/webhook")
+                print(f"  Verify token:            {config.whatsapp_verify_token or '(defina WHATSAPP_VERIFY_TOKEN)'}")
+                print("  Cole os dois em Meta for Developers > WhatsApp > Configuration > Webhook")
+                print("  e assine o campo 'messages'. A URL muda a cada reinicio (tunel gratuito).")
+                print("=" * 64 + "\n")
+
+            tunel = abrir_tunel(porta, mostrar)
+            if tunel is None:
+                print("cloudflared nao encontrado: sem tunel publico. Instale com: winget install Cloudflare.cloudflared")
+
+        print(f"{config.fafa_nome} · webhook WhatsApp em http://{args.host or config.fafa_web_host}:{porta}/webhook")
+        try:
+            uvicorn.run(criar_app(Agente()), host=args.host or config.fafa_web_host, port=porta, log_level="info")
+        finally:
+            if tunel is not None:
+                tunel.terminate()
         return 0
 
     if comando == "notificar":

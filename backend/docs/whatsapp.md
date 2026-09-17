@@ -39,17 +39,19 @@ Template sugerido para aprovar no painel da Meta (categoria *Utility*):
 
 ## 3. Conversa (com webhook)
 
-A Meta precisa alcançar seu servidor por HTTPS público. No desktop SIZE-LIDAR:
+A Meta precisa alcançar seu servidor por HTTPS público. No desktop SIZE-LIDAR
+basta o **Fafa-WhatsApp.bat** (ou `fafa whatsapp`): ele sobe o webhook na porta
+8001 **e** abre o túnel do cloudflared, imprimindo a URL pública pronta:
 
-```powershell
-fafa whatsapp                      # sobe em http://127.0.0.1:8000
-cloudflared tunnel --url http://127.0.0.1:8000   # em outro terminal
+```
+  URL publica do webhook:  https://xxxx.trycloudflare.com/webhook
+  Verify token:            <o seu WHATSAPP_VERIFY_TOKEN>
 ```
 
-O `cloudflared` imprime uma URL `https://xxxx.trycloudflare.com`. No painel da
+Pré-requisito único: `winget install Cloudflare.cloudflared`. No painel da
 Meta → WhatsApp → Configuration → Webhook:
 
-- Callback URL: `https://xxxx.trycloudflare.com/webhook`
+- Callback URL: a URL impressa (`https://xxxx.trycloudflare.com/webhook`)
 - Verify token: o mesmo `WHATSAPP_VERIFY_TOKEN` do `.env`
 - Assinar o campo `messages`
 

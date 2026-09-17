@@ -21,6 +21,6 @@ for dev in AudioUtilities.GetAllDevices():
         if ajustar and atual < 0.99:
             vol.SetMasterVolumeLevelScalar(1.0, None)
             vol.SetMute(0, None)
-            print(f"   -> ajustado para 100% e sem mudo")
+            print("   -> ajustado para 100% e sem mudo")
     except Exception as exc:  # noqa: BLE001
         print(f"{nome:<45} (sem acesso: {exc})")

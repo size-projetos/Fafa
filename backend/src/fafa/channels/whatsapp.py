@@ -19,6 +19,7 @@ ativa mandando qualquer mensagem ao Fafa antes de sair.
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -133,6 +134,49 @@ class CanalWhatsApp(Canal):
                         except Exception:  # noqa: BLE001
                             pass
         return respondidas
+
+
+def abrir_tunel(porta: int, ao_url=None):
+    """Sobe um tunel publico (cloudflared quick tunnel) para a porta local.
+
+    Devolve o processo, e chama `ao_url(url)` quando a URL https://...trycloudflare.com
+    aparecer no log. Se o cloudflared nao estiver instalado, devolve None.
+    """
+    import re
+    import shutil
+    import subprocess
+    import threading
+
+    exe = shutil.which("cloudflared")
+    if not exe:
+        for candidato in (
+            r"C:\Program Files (x86)\cloudflared\cloudflared.exe",
+            r"C:\Program Files\cloudflared\cloudflared.exe",
+        ):
+            if Path(candidato).exists():
+                exe = candidato
+                break
+    if not exe:
+        return None
+
+    proc = subprocess.Popen(
+        [exe, "tunnel", "--url", f"http://127.0.0.1:{porta}", "--no-autoupdate"],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace",
+    )
+    padrao = re.compile(r"https://[a-z0-9-]+\.trycloudflare\.com")
+
+    estado = {"avisado": False}
+
+    def ler2():
+        assert proc.stdout is not None
+        for linha in proc.stdout:
+            m = padrao.search(linha)
+            if m and not estado["avisado"] and ao_url:
+                estado["avisado"] = True
+                ao_url(m.group(0))
+
+    threading.Thread(target=ler2, daemon=True).start()
+    return proc
 
 
 def criar_app(agente: Agente | None = None):
