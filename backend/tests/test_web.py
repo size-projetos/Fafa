@@ -81,3 +81,20 @@ def test_ouvir_sem_chave_503(cliente):
     c, _ = cliente
     r = c.post("/api/ouvir", files={"audio": ("f.webm", b"x" * 5000, "audio/webm")})
     assert r.status_code == 503
+
+
+def test_nucleo_no_ar(monkeypatch):
+    class R:
+        status_code = 200
+
+        def json(self):
+            return {"status": "ok"}
+
+    monkeypatch.setattr(web.httpx, "get", lambda url, timeout: R())
+    assert web.nucleo_no_ar("http://127.0.0.1:8000/")
+
+    def falha(url, timeout):
+        raise ConnectionError()
+
+    monkeypatch.setattr(web.httpx, "get", falha)
+    assert not web.nucleo_no_ar("http://127.0.0.1:8000/")

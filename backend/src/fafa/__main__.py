@@ -65,6 +65,16 @@ def main(argv: list[str] | None = None) -> int:
 
         porta = args.porta or config.fafa_web_port
         url = f"http://{config.fafa_web_host}:{porta}/"
+
+        from fafa.channels.web import nucleo_no_ar
+
+        if nucleo_no_ar(url):
+            # Ja existe um Fafa rodando: so reabre a janela e sai.
+            print(f"{config.fafa_nome} ja esta no ar em {url}; reabrindo a janela.")
+            if not args.sem_janela:
+                abrir_como_app(url)
+            return 0
+
         app = criar_app(Agente())
         if not args.sem_janela:
             threading.Timer(1.2, abrir_como_app, args=(url,)).start()

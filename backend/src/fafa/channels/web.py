@@ -13,6 +13,8 @@ Tudo fica em 127.0.0.1: e um aplicativo local, nao um servico publico.
 from __future__ import annotations
 
 import logging
+
+import httpx
 from pathlib import Path
 
 from fafa import __version__
@@ -140,6 +142,15 @@ def criar_app(agente: Agente | None = None):
         log.warning("painel nao encontrado em %s; servindo so a API", PASTA_PAINEL)
 
     return app
+
+
+def nucleo_no_ar(url: str) -> bool:
+    """True se ja ha um Fafa respondendo em /api/saude nessa URL."""
+    try:
+        r = httpx.get(url.rstrip("/") + "/api/saude", timeout=1.5)
+        return r.status_code == 200 and r.json().get("status") == "ok"
+    except Exception:  # noqa: BLE001
+        return False
 
 
 def abrir_como_app(url: str) -> None:
